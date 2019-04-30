@@ -1,17 +1,27 @@
-class IntroScene extends Phaser.Scene {
+class IntroScene extends Phaser.Scene { 
     constructor(){
-        super({key:"IntroScene"});
+        super({key:"IntroScene"})
     }
 
   
     preload ()
     {
         this.load.image('intro', 'Conceptart/ValdisIntroPic.jpg')
+        this.load.image('button', 'assets/start_button.png')
+       
         
     }
     create ()
     {
-        this.image = this.add.image(600, 300, 'intro')
+        this.image = this.add.image(620, 300, 'intro')
+        const startGame = this.add.text(500, 400, 'Press D to start game', {fill: 'black'})
+        this.input.keyboard.on('keyup', function(event){
+            if(event.key == 'D' || 'd'){
+                this.scene.start("MovingObject")
+            }
+        }, this)
+        console.log("Tereee");
+        
     }
    
 }
