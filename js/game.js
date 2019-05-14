@@ -28,7 +28,5 @@
     };
 
 let game = new Phaser.Game(gameConfig);
-resize()
-window.addEventListener("resize", resize, false);
 
    

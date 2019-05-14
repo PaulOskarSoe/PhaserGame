@@ -1,6 +1,7 @@
 let scoreText
 let score = 0
 let scores = []
+let text
 localStorage.setItem('highscore', JSON.stringify(scores));
 
 class MovingObject extends Phaser.Scene{
@@ -20,11 +21,13 @@ class MovingObject extends Phaser.Scene{
     }
     create ()
     {
+        text = ["jookse Valdis", "Sa oled parim", "Keegi ei saa sind kätte", "Davai VALDIS!"]
+
         let music = this.sound.add('backgroundmusic')
         music.play()
         this.background = this.add.tileSprite(0, 0, game.config.width, game.config.height, "background").setOrigin(0,0).setScrollFactor(0)
         scoreText = this.add.text(16, 16, 'Skoor: 0', { fontSize: '32px', fill: '#000' });
-
+        
         //Zombie Pool and Group
         this.zombieGroup = this.add.group({
             removeCallback: function(zombie){
@@ -49,11 +52,13 @@ class MovingObject extends Phaser.Scene{
             }
         })
 
-
+        //add player
         this.playerJumps = 0
         this.addPlatform(game.config.width / 2, game.config.width /2, game.config.height * gameOptions.platformVerticalLimit[1])
         this.player = this.physics.add.sprite(gameOptions.playerStartPosition, gameConfig.height * 0.3, "player")
         this.player.setGravityY(gameOptions.playerGravity)
+        
+        //create animations
         this.anims.create({
             key: "run",
             frames: this.anims.generateFrameNumbers("player", {start:0, end:1}), 
@@ -68,8 +73,8 @@ class MovingObject extends Phaser.Scene{
             repeat: -1
         })
 
-    
-        setInterval(this.mummyProperties(), 1000)
+        //create mummy
+        this.mummyProperties()
 
         //collider for player
         this.physics.add.collider(this.player, this.platformGroup, function(){
@@ -80,8 +85,11 @@ class MovingObject extends Phaser.Scene{
  
         // checking for input
         this.input.on("pointerdown", this.jump, this);
+        this.showText(text)
+
     }
 
+    //function for mummu properties
     mummyProperties(){
         this.mummy = this.physics.add.sprite(gameOptions.playerStartPosition * 0.4 , gameConfig.height * 0.1, "mummy")
         this.mummy.setGravityY(500)
@@ -90,9 +98,24 @@ class MovingObject extends Phaser.Scene{
             this.mummy.setVelocityX(150)
             this.mummy.anims.play("run_mummy")
         }, null, this)
-
     }
 
+    //Shows text on collision
+    showText(text){
+        let index = 0
+        this.physics.add.collider(this.player, this.platformGroup, function(){
+            console.log(text)
+            index += 1
+            this.add.text(60, 60, text[index], { fontSize: '32px', fill: '#000' });
+            if(text[index] == text.length - 1){
+                index = 0
+            }
+        }, null, this)
+        
+    
+    }
+
+    //Adds a new platform
     addPlatform(platformWidth, posX, posY){
         let platform
         if(this.platformPool.getLength()){
@@ -111,6 +134,7 @@ class MovingObject extends Phaser.Scene{
         this.nextPlatformDistance = Phaser.Math.Between(gameOptions.spawnRange[0], gameOptions.spawnRange[1])
     }
 
+    //Jumps on click
     jump(){
         if(this.player.body.touching.down || (this.playerJumps > 0 && this.playerJumps < gameOptions.jumps)){
             if(this.player.body.touching.down){
@@ -125,7 +149,9 @@ class MovingObject extends Phaser.Scene{
 
     update(delta){
     showScore()
+    //Moves background
     this.background.tilePositionX += 4
+    //When game is over then add highscore
     if(this.player.y > game.config.height){
         scores = JSON.parse(localStorage.getItem('highscore'))
         scores.push(score)
@@ -134,11 +160,7 @@ class MovingObject extends Phaser.Scene{
         this.scene.start("EndScene");
         score = 0
     }
-    if(this.mummy.y > game.config.height){
-        this.mummyProperties()
-        
-    }
-    if( this.physics.add.collider(this.mummy, this.player, function(){
+    if(this.physics.add.collider(this.mummy, this.player, function(){
         scores = JSON.parse(localStorage.getItem('highscore'))
         // scores.push(score)
         // localStorage.setItem('highscore', JSON.stringify(scores))
@@ -148,6 +170,15 @@ class MovingObject extends Phaser.Scene{
         this.scene.start("EndScene")
         score = 0
     }, null, this))
+   
+    //Add new mummy
+    if(this.mummy.y > game.config.height){
+        this.mummyProperties()     
+    }
+    if(this.mummy.x > this.player.x){
+        this.mummyProperties()
+    }
+    
     this.player.x = gameOptions.playerStartPosition;
 
     let minDistance = game.config.width;
@@ -182,21 +213,5 @@ function showScore(){
     scoreText.setText('Skoor: ' + score)
     //console.log(score);
     
-}
-
-function resize(){
-    let canvas = document.querySelector("canvas");
-    let windowWidth = window.innerWidth;
-    let windowHeight = window.innerHeight;
-    let windowRatio = windowWidth / windowHeight;
-    let gameRatio = game.config.width / game.config.height;
-    if(windowRatio < gameRatio){
-        canvas.style.width = windowWidth + "px";
-        canvas.style.height = (windowWidth / gameRatio) + "px";
-    }
-    else{
-        canvas.style.width = (windowHeight * gameRatio) + "px";
-        canvas.style.height = windowHeight + "px";
-    }
 }
     
