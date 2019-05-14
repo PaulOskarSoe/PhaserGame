@@ -14,7 +14,8 @@ class IntroScene extends Phaser.Scene {
     create ()
     {
         this.image = this.add.image(620, 300, 'intro')
-        const startGame = this.add.text(500, 400, 'Press D to start game', {fill: 'black'})
+        this.add.text(500, 400, 'Press D to start game', {fill: 'black'})
+        //this.showScore()
         this.input.keyboard.on('keyup', function(event){
             if(event.key == 'D' || 'd'){
                 this.scene.start("MovingObject")
